@@ -4,6 +4,7 @@ float arcWidth = 5;
 PShader shade;
 PShader channels;
 PShader blur;
+PShader brcosa;
 
 void setup(){
   size(640,640,P2D);
@@ -11,17 +12,18 @@ void setup(){
   colorMode(HSB,100);
   background(0);
   noStroke();
-  //shade = loadShader("test.glsl");
-  shade = loadShader("randomFlares.glsl");   
+  
+  shade = loadShader("burst.glsl");
+  //shade = loadShader("burst.glsl","texVert.glsl");
+  //shade = loadShader("randomFlares.glsl");   
   channels = loadShader("channels.glsl");
-  //shade = loadShader("test.glsl","texVert.glsl");
   blur = loadShader("myBlur.glsl"); 
-  //shade = loadShader("texFrag.glsl","texVert.glsl");
+  brcosa = loadShader("brcosa.glsl");
 }
 
 void draw(){
   //blur.set("hue", map(mouseX, 0, width, 0, TWO_PI));
-   shade.set("time", (float) millis()/1000.0);
+    shade.set("time", (float) millis()/1000.0);
    
     channels.set("rbias", 0.0, 0.0);
     //channels.set("gbias", map(mouseY, 0, height, -0.2, 0.2), 0.0);
@@ -39,7 +41,7 @@ void draw(){
    //blur.set("sigma", map(mouseX, 0.1, width, 0, 10.0));
    //blur.set("blurSize", (int) map(mouseY, 0.1, height, 0, 30.0));
    blur.set("sigma", 4.0);
-   int blurSize = int(map(noise(frameCount),0,1,18,22));
+   int blurSize = int(map(noise(frameCount+2000),0,1,3,5));
    blur.set("blurSize", blurSize);
    
    //shade.set("threshold", map(mouseX, 0, width, 0, 1));
@@ -47,6 +49,13 @@ void draw(){
     //shade.set("rollRate", map(mouseY, 0, height, 0, 10.0));
     //shade.set("rollAmount", 0.25);
     
+    
+    brcosa.set("brightness", 1.0);
+    //brcosa.set("contrast", map(mouseX, 0, width, -5, 5));
+    brcosa.set("contrast", 1.0);
+    //brcosa.set("saturation", map(mouseY, 0, height, -5, 5));
+    float saturationAmnt = map(noise(frameCount+1000),0,1,3,4);
+    brcosa.set("saturation", saturationAmnt);
     
   for(float i=0; i < dv; i++){
     float step = i/dv;
@@ -58,6 +67,8 @@ void draw(){
   }
 
   filter(shade);
-  filter(channels);  
+  //filter(brcosa);  
+  filter(channels);
   filter(blur);
+  
 }
