@@ -6,14 +6,20 @@ PShader channels;
 PShader blur;
 PShader brcosa;
 
+Burst burst1;
+Burst burst2;
+
+
 void setup(){
   size(640,640,P2D);
   //smooth(16);
   colorMode(HSB,100);
   background(0);
   noStroke();
+  burst1 = new Burst();
+  burst2 = new Burst();
   
-  shade = loadShader("burst.glsl");
+  shade = loadShader("burst2.glsl");
   //shade = loadShader("burst.glsl","texVert.glsl");
   //shade = loadShader("randomFlares.glsl");   
   channels = loadShader("channels.glsl");
@@ -22,9 +28,17 @@ void setup(){
 }
 
 void draw(){
-  //blur.set("hue", map(mouseX, 0, width, 0, TWO_PI));
+
+    burst1.fadePercent = lerp(burst1.lastFadePercent, burst1.fade, .2);
+    burst1.lastFadePercent = burst1.fadePercent;
+  
     shade.set("time", (float) millis()/1000.0);
-   
+    shade.set("burst1Fade", burst1.fadePercent);
+    shade.set("burst1Fract", burst1.fract);
+    shade.set("burst2Fade", burst2.fadePercent);
+    shade.set("burst2Fract", burst2.fract);
+    
+    
     channels.set("rbias", 0.0, 0.0);
     //channels.set("gbias", map(mouseY, 0, height, -0.2, 0.2), 0.0);
     //float gbias = -0.01 + .01 * cos(.005 * float(frameCount)) + 0.008 * noise(frameCount);
@@ -68,7 +82,28 @@ void draw(){
 
   filter(shade);
   //filter(brcosa);  
-  filter(channels);
-  filter(blur);
+  //filter(channels);
+  //filter(blur);
   
+}
+
+public void keyPressed() {
+  if (key=='a' || key=='A') {burst1.fract += 0.5;}
+  if (key=='s' || key=='s') {burst2.fract += 0.5;}
+  if (key=='1'){fadeInOutBurst(1); }
+  if (key=='i'){printInfo();}
+  
+  
+}
+ 
+public void fadeInOutBurst(int burstIndex){
+  burst1.fade = burst1.fade > 0 ? 0 : 1.0;
+  println(burst1.fade);
+}
+
+public void printInfo(){
+  println(burst1.lastFadePercent);
+  println(burst1.fadePercent);
+  println(burst2.lastFadePercent);
+  println(burst2.fadePercent);  
 }
