@@ -1,3 +1,7 @@
+import themidibus.*;
+import javax.sound.midi.MidiMessage; 
+
+MidiBus myBus; // The MidiBus
 //https://www.shadertoy.com/view/3s3GDn
 int dv = 20;
 float arcWidth = 5;
@@ -6,8 +10,12 @@ PShader channels;
 PShader blur;
 PShader brcosa;
 
-Burst burst1;
-Burst burst2;
+Burst burst0 = new Burst();
+Burst burst1 = new Burst();
+Burst burst2 = new Burst();
+Burst burst3 = new Burst();
+Burst[] bursts = new Burst[4];
+int curBurstIndex = 0;
 
 
 void setup(){
@@ -16,8 +24,13 @@ void setup(){
   colorMode(HSB,100);
   background(0);
   noStroke();
-  burst1 = new Burst();
-  burst2 = new Burst();
+  MidiBus.list();
+  myBus = new MidiBus(this, 3, 3 );
+  
+  bursts[0] = burst0;
+  bursts[1] = burst1;
+  bursts[2] = burst2;
+  bursts[3] = burst3;
   
   shade = loadShader("burst2.glsl");
   //shade = loadShader("burst.glsl","texVert.glsl");
@@ -29,14 +42,28 @@ void setup(){
 
 void draw(){
 
-    burst1.fadePercent = lerp(burst1.lastFadePercent, burst1.fade, .2);
-    burst1.lastFadePercent = burst1.fadePercent;
+    float fadeSpeed = 0.075;    
+    bursts[0].fadePercent = lerp(bursts[0].lastFadePercent, bursts[0].fade, fadeSpeed);
+    bursts[0].lastFadePercent = bursts[0].fadePercent;
+    bursts[1].fadePercent = lerp(bursts[1].lastFadePercent, bursts[1].fade, fadeSpeed);
+    bursts[1].lastFadePercent = bursts[1].fadePercent;
+    bursts[2].fadePercent = lerp(bursts[2].lastFadePercent, bursts[2].fade, fadeSpeed);
+    bursts[2].lastFadePercent =bursts[2].fadePercent;
+    bursts[3].fadePercent = lerp(bursts[3].lastFadePercent, bursts[3].fade, fadeSpeed);
+    bursts[3].lastFadePercent = bursts[3].fadePercent;
+
   
     shade.set("time", (float) millis()/1000.0);
-    shade.set("burst1Fade", burst1.fadePercent);
-    shade.set("burst1Fract", burst1.fract);
-    shade.set("burst2Fade", burst2.fadePercent);
-    shade.set("burst2Fract", burst2.fract);
+    shade.set("burst0Fade", bursts[0].fadePercent);
+    shade.set("burst0Fract", bursts[0].fract);    
+    shade.set("burst1Fade", bursts[1].fadePercent);
+    shade.set("burst1Fract", bursts[1].fract);
+    shade.set("burst2Fade", bursts[2].fadePercent);
+    shade.set("burst2Fract", bursts[2].fract);
+    shade.set("burst3Fade", bursts[3].fadePercent);
+    shade.set("burst3Fract", bursts[3].fract);
+    
+    
     
     
     channels.set("rbias", 0.0, 0.0);
@@ -88,17 +115,25 @@ void draw(){
 }
 
 public void keyPressed() {
-  if (key=='a' || key=='A') {burst1.fract += 0.5;}
-  if (key=='s' || key=='s') {burst2.fract += 0.5;}
+  if (key=='a' || key=='A') {burstFractIncrement(0);}
+  if (key=='s' || key=='S') {burstFractIncrement(1);}
+  if (key=='z' || key=='Z') {burstFractIncrement(2);}
+  if (key=='x' || key=='X') {burstFractIncrement(3);}
   if (key=='1'){fadeInOutBurst(1); }
-  if (key=='i'){printInfo();}
-  
-  
+  if (key=='i'){printInfo();} 
 }
  
-public void fadeInOutBurst(int burstIndex){
-  burst1.fade = burst1.fade > 0 ? 0 : 1.0;
-  println(burst1.fade);
+public void burstFractIncrement(int index){
+  bursts[index].fade = 1.0;
+  bursts[index].fadePercent = 1.0;
+  bursts[index].lastFadePercent = 1.0;
+  bursts[index].fract += (1 + noise(frameCount)) ;
+  fadeInOutBurst(index);
+}
+ 
+public void fadeInOutBurst(int index){
+  bursts[index].fade = bursts[index].fade > 0 ? 0 : 1.0;
+  println(bursts[index].fade);
 }
 
 public void printInfo(){
@@ -107,3 +142,24 @@ public void printInfo(){
   println(burst2.lastFadePercent);
   println(burst2.fadePercent);  
 }
+
+void noteOn(int channel, int pitch, int velocity) {
+  // Receive a noteOn
+  println("Note On:");
+  println("Pitch:"+pitch);
+
+  curBurstIndex = (curBurstIndex + 1)%4;  
+  burstFractIncrement(curBurstIndex);
+  
+  //if(channel == 0 && pitch == 38){
+  //  {burstFractIncrement(3);}
+  //}
+  
+}
+
+//void midiMessage(MidiMessage message, long timestamp, String bus_name) { 
+//  int note = (int)(message.getMessage()[1] & 0xFF) ;
+//  int vel = (int)(message.getMessage()[2] & 0xFF);
+
+//   println("Bus " + bus_name + ": Note "+ note + ", vel " + vel);
+//}
