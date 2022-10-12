@@ -86,31 +86,31 @@ float star_burst( vec2 p , float fractInput, float lfoTime)
 }
 
 
-// float star_burst2(vec2 p)
-// {
-//     float k0=0.2;// how many rays noise0 + noise1 coeff - orig 2.0
-//     float k1=2.;// length2 power coeff(how long the rays are?) - orig 1.0
-//     float k2=.5+.1*sin(.06*time);;// length2 power coeff (how long the rays are?)  - orig 0.5
-//     float k3=12.+3*sin(.32*time);// n1 coeff (212 is A LOT of rays)- orig 12.0
-//     float k4=20.+2*sin(.22*time);;// end noise power coeff (how MANY rays? small means more)- orig 12.0
-//     float k5=2.;// end noise power coeff(big makes center big and blurry) - orig 2.0
-//     float k6=5.2;// end noise power coeff (big makes center big and blurry)- orig 5.2
-//     float k7=24.;// end noise clamp coeff (how strong center bright, lower is more powerful)- orig 4.0
-//     float k8=6.2;// end noise power coeff (how STRONG rays)- orig 6.2
+float star_burst2(vec2 p)
+{
+    float k0=0.2;// how many rays noise0 + noise1 coeff - orig 2.0
+    float k1=1.;// length2 power coeff(how long the rays are?) - orig 1.0
+    float k2=.5+.1*sin(.06*time);;// length2 power coeff (how long the rays are?)  - orig 0.5
+    float k3=12.+3*sin(.32*time);// n1 coeff (212 is A LOT of rays)- orig 12.0
+    float k4=20.+2*sin(.22*time);;// end noise power coeff (how MANY rays? small means more)- orig 12.0
+    float k5=2.;// end noise power coeff(big makes center big and blurry) - orig 2.0
+    float k6=5.2;// end noise power coeff (big makes center big and blurry)- orig 5.2
+    float k7=18.;// end noise clamp coeff (how strong center bright, lower is more powerful)- orig 4.0
+    float k8=6.2;// end noise power coeff (how STRONG rays)- orig 6.2
     
-//     float l=length(p);
-//     float l2=pow(l*k1,k2);
-//     float n0=noise(vec2(atan(p.y,p.x)*k0,l2)*k3);
-//     float n1=noise(vec2(atan(-p.y,-p.x)*k0,l2)*k3);
-//     float n=pow(max(n0,n1),k4)*pow(clamp(1.-l*k5,0.,1.),k6);
-//     n+=pow(clamp(1.-(l*k7-.1),0.,1.),k8);
-//     return n;
-// }
+    float l=length(p);
+    float l2=pow(l*k1,k2);
+	float n0 = noise( vec2( atan(  p.y,  p.x ) * k0, l2 ) * k3, 2 );
+	float n1 = noise( vec2( atan( -p.y, -p.x ) * k0, l2 ) * k3, 2 );
+    float n=pow(max(n0,n1),k4)*pow(clamp(1.-l*k5,0.,1.),k6);
+    n+=pow(clamp(1.-(l*k7-.1),0.,1.),k8);
+    return n;
+}
 
 vec4 renderStarburst(float index, vec2 point, float myFract, float myFade){
     point -= 0.5; // center 
     point *= 0.5; // bigger
-    float lfoTime = index * .01; 
+    float lfoTime = index * .1; 
 	float r = star_burst(point * 1.1 , myFract,lfoTime);
 	float g = star_burst(point ,myFract,lfoTime);
 	float b = star_burst(point * 0.9 , myFract,lfoTime);
@@ -141,15 +141,16 @@ void main()
     // another pass if we want to...
 
     // // gl_FragColor-=gl_FragColor+.3;
+    p -= 0.5; // center 
+    p *= 0.5; // bigger
+    float r=star_burst2(p*1.1);
+    float g=star_burst2(p);
+    float b=star_burst2(p*.9);
 
-    // r=star_burst2(p*1.1);
-    // g=star_burst2(p);
-    // b=star_burst2(p*.9);
-
-    // // Output to screen
-    // // vec3 col=pow(vec3(r,g,b),vec3(1./2.2));
-    // col=pow(vec3(r,g,b),vec3(1./(sin(.8*time)*2+4.2)));
-    // gl_FragColor+=0.3*vec4(col,1.);
+    // Output to screen
+    // vec3 col=pow(vec3(r,g,b),vec3(1./2.2));
+    vec3 col=pow(vec3(r,g,b),vec3(1./(sin(.8*time)*2+8.2)));
+    gl_FragColor+=0.2*vec4(col,1.);
 
 
 }

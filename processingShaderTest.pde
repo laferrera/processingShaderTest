@@ -1,6 +1,9 @@
 import themidibus.*;
 import javax.sound.midi.MidiMessage; 
 
+//PImage tex[] = new PImage[30];
+int frame = 0;
+
 MidiBus myBus; // The MidiBus
 //https://www.shadertoy.com/view/3s3GDn
 int dv = 20;
@@ -9,6 +12,7 @@ PShader shade;
 PShader channels;
 PShader blur;
 PShader brcosa;
+PShader intensity;
 
 Burst burst0 = new Burst();
 Burst burst1 = new Burst();
@@ -33,6 +37,7 @@ void setup(){
   bursts[3] = burst3;
   
   shade = loadShader("burst2.glsl");
+  intensity = loadShader("intensity.glsl","texVert.glsl");
   //shade = loadShader("burst.glsl","texVert.glsl");
   //shade = loadShader("randomFlares.glsl");   
   channels = loadShader("channels.glsl");
@@ -41,8 +46,9 @@ void setup(){
 }
 
 void draw(){
-
-    float fadeSpeed = 0.075;    
+ 
+  
+    float fadeSpeed = 0.05;    
     bursts[0].fadePercent = lerp(bursts[0].lastFadePercent, bursts[0].fade, fadeSpeed);
     bursts[0].lastFadePercent = bursts[0].fadePercent;
     bursts[1].fadePercent = lerp(bursts[1].lastFadePercent, bursts[1].fade, fadeSpeed);
@@ -107,10 +113,11 @@ void draw(){
     arc(width/2, height/2, width * 0.8, height * 0.8, TWO_PI *step, TWO_PI *step + TWO_PI/dv/arcWidth);
   }
 
-  filter(shade);
+  //filter(shade);
   //filter(brcosa);  
   //filter(channels);
   //filter(blur);
+  filter(intensity);
   
 }
 
@@ -133,7 +140,6 @@ public void burstFractIncrement(int index){
  
 public void fadeInOutBurst(int index){
   bursts[index].fade = bursts[index].fade > 0 ? 0 : 1.0;
-  println(bursts[index].fade);
 }
 
 public void printInfo(){
