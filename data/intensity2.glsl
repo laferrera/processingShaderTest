@@ -34,11 +34,7 @@ void main()
     vec4 count = vec4(0.0, 0.0, 0.0, 0.0);
     for( int i=0; i < int(buckets); ++i ) {
         float j = float(i) / buckets;
-        // float j = float(i) / float(resolution.y);
-        // vec4 pixel=texture(iChannel1,vec2(uv.x,j))*256.;
-        // vec4 pixel = texture2D(texture, vec2(uv.x, j )) * 256.;
         vec4 pixel=texture2D(texture,vec2(uv.x,j))*256.;
-
 
         // calculate the Rec.709 luma for this pixel
         pixel.a = pixel.r * 0.2126 + pixel.g * 0.7152 + pixel.b * 0.0722;

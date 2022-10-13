@@ -12,7 +12,7 @@ PShader shade;
 PShader channels;
 PShader blur;
 PShader brcosa;
-PShader intensity;
+PShader tv1;
 
 Burst burst0 = new Burst();
 Burst burst1 = new Burst();
@@ -21,9 +21,16 @@ Burst burst3 = new Burst();
 Burst[] bursts = new Burst[4];
 int curBurstIndex = 0;
 
+import processing.video.*;
+Capture cam;
+
+float y = 0.1;
+float x = 0.1;
+float z = 0.1;
+float hue = 0;
 
 void setup(){
-  size(640,640,P2D);
+  size(640,640,P3D);
   //smooth(16);
   colorMode(HSB,100);
   background(0);
@@ -37,12 +44,11 @@ void setup(){
   bursts[3] = burst3;
   
   shade = loadShader("burst2.glsl");
-  intensity = loadShader("intensity.glsl","texVert.glsl");
-  //shade = loadShader("burst.glsl","texVert.glsl");
-  //shade = loadShader("randomFlares.glsl");   
+  tv1 = loadShader("tv1.glsl");   
   channels = loadShader("channels.glsl");
   blur = loadShader("myBlur.glsl"); 
   brcosa = loadShader("brcosa.glsl");
+  
 }
 
 void draw(){
@@ -104,21 +110,20 @@ void draw(){
     float saturationAmnt = map(noise(frameCount+1000),0,1,3,4);
     brcosa.set("saturation", saturationAmnt);
     
-  for(float i=0; i < dv; i++){
-    float step = i/dv;
-    float n = map(noise(step, frameCount),0,1,-1,1) * 0.1;
-    float h = map(sin(TWO_PI * step)+n, -1, 1, 0, 100);
-    float b = pow( map(cos(2*TWO_PI * step)+n, -1, 1, 0 ,1), 0.5)*100;
-    fill(h, 100, b);
-    arc(width/2, height/2, width * 0.8, height * 0.8, TWO_PI *step, TWO_PI *step + TWO_PI/dv/arcWidth);
-  }
+  //for(float i=0; i < dv; i++){
+  //  float step = i/dv;
+  //  float n = map(noise(step, frameCount),0,1,-1,1) * 0.1;
+  //  float h = map(sin(TWO_PI * step)+n, -1, 1, 0, 100);
+  //  float b = pow( map(cos(2*TWO_PI * step)+n, -1, 1, 0 ,1), 0.5)*100;
+  //  fill(h, 100, b);
+  //  arc(width/2, height/2, width * 0.8, height * 0.8, TWO_PI *step, TWO_PI *step + TWO_PI/dv/arcWidth);
+  //}
 
-  //filter(shade);
+  filter(shade);
   //filter(brcosa);  
-  //filter(channels);
-  //filter(blur);
-  filter(intensity);
-  
+  filter(channels);
+  filter(blur);
+  filter(tv1);
 }
 
 public void keyPressed() {
